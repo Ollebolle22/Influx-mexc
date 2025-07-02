@@ -1,3 +1,2 @@
-websockets
 influxdb-client
 requests

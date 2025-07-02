@@ -73,7 +73,8 @@ while True:
         # Hämta och skriv trades
         trades = get_my_trades()
         if isinstance(trades, list):
-            for trade in trades:
+            trades_sorted = sorted(trades, key=lambda t: int(t["time"]))
+            for trade in trades_sorted:
                 side = "sell" if trade.get("side") == "BUY" else "buy"
                 point = (
                     Point("mexc_trade")

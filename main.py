@@ -76,16 +76,22 @@ while True:
             trades_sorted = sorted(trades, key=lambda t: int(t["time"]))
             for trade in trades_sorted:
                 side = "sell" if trade.get("side") == "BUY" else "buy"
+                price = float(trade["price"])
+                qty = float(trade["qty"])
+                total = price * qty
                 point = (
                     Point("mexc_trade")
                     .tag("symbol", MEXC_SYMBOL)
                     .tag("side", side)
-                    .field("price", float(trade["price"]))
-                    .field("qty", float(trade["qty"]))
+                    .field("price", price)
+                    .field("qty", qty)
+                    .field("total_usd", total)
                     .time(datetime.utcnow())
                 )
                 write_api.write(bucket=INFLUX_BUCKET, record=point)
-                logging.info(f"📈 Trade {side} @ {trade['price']} x {trade['qty']}")
+                logging.info(
+                    f"📈 {side.upper()} {trade['price']} x {trade['qty']} = {total} USD"
+                )
         else:
             logging.warning(f"❌ Kunde inte tolka trades: {trades}")
 

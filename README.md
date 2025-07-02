@@ -30,3 +30,4 @@ Mätningen `mexc_balance` lagrar fälten `asset`, `free` och `locked` för varje
 ```bash
 docker build -t ghcr.io/<your-github-username>/mexc-ws-influx:latest .
 docker push ghcr.io/<your-github-username>/mexc-ws-influx:latest
+```

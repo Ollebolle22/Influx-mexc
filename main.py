@@ -114,7 +114,10 @@ while True:
         if isinstance(trades, list):
             trades_sorted = sorted(trades, key=lambda t: int(t["time"]))
             for trade in trades_sorted:
-                side = trade.get("side", "").lower()
+                if "isBuyer" in trade:
+                    side = "buy" if trade.get("isBuyer") else "sell"
+                else:
+                    side = trade.get("side", "").lower()
                 price = float(trade["price"])
                 qty = float(trade["qty"])
                 total = price * qty
@@ -140,8 +143,9 @@ while True:
                     .time(datetime.fromtimestamp(int(trade["time"]) / 1000))
                 )
                 write_api.write(bucket=INFLUX_BUCKET, record=point)
+                icon = "📈" if side == "buy" else "📉"
                 logging.info(
-                    f"📈 {side.upper()} {trade['price']} x {trade['qty']} = {total} USD"
+                    f"{icon} {side.upper()} {trade['price']} x {trade['qty']} = {total} USD"
                 )
         else:
             logging.warning(f"❌ Kunde inte tolka trades: {trades}")

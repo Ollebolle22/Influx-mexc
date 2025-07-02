@@ -114,7 +114,7 @@ while True:
         if isinstance(trades, list):
             trades_sorted = sorted(trades, key=lambda t: int(t["time"]))
             for trade in trades_sorted:
-                side = "sell" if trade.get("side") == "BUY" else "buy"
+                side = trade.get("side", "").lower()
                 price = float(trade["price"])
                 qty = float(trade["qty"])
                 total = price * qty
@@ -137,7 +137,7 @@ while True:
                     .field("commission", commission)
                     .field("commissionAsset", commission_asset)
                     .field("time", trade_time)
-                    .time(datetime.utcnow())
+                    .time(datetime.fromtimestamp(int(trade["time"]) / 1000))
                 )
                 write_api.write(bucket=INFLUX_BUCKET, record=point)
                 logging.info(

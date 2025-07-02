@@ -2,6 +2,7 @@ import os
 import time
 import hmac
 import hashlib
+from urllib.parse import urlencode
 import requests
 import logging
 from datetime import datetime
@@ -30,12 +31,12 @@ write_api = influx.write_api(write_options=WriteOptions(batch_size=1))
 
 # Signeringsfunktion
 def sign(params: dict, secret: str) -> str:
-    query = '&'.join([f"{k}={params[k]}" for k in sorted(params)])
+    query = urlencode(params)
     return hmac.new(secret.encode(), query.encode(), hashlib.sha256).hexdigest()
 
 # Hämta trades
 def get_my_trades():
-    path = "/api/v3/order/trade"
+    path = "/api/v3/myTrades"
     url = f"https://api.mexc.com{path}"
     timestamp = int(time.time() * 1000)
     params = {

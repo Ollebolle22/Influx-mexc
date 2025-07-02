@@ -1,6 +1,21 @@
 # MEXC WebSocket to InfluxDB
 
-Real-time streaming of trades from MEXC to InfluxDB using WebSocket.
+Real-time streaming of trades and balances from MEXC to InfluxDB.
+
+### Trades
+
+Mätningen `mexc_trade` innehåller nu även:
+
+- `tradeId`
+- `orderId`
+- `quoteQty`
+- `commission`
+- `commissionAsset`
+- `time`
+
+### Balans
+
+Mätningen `mexc_balance` lagrar fälten `asset`, `free` och `locked` för varje tillgång.
 
 ## Environment Variables
 

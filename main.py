@@ -65,6 +65,45 @@ def get_balances():
     r = requests.get(url, headers=headers, params=params)
     return r.json()
 
+# Hämta candles
+def get_candles(symbol: str, interval: str = "1m", limit: int = 200):
+    url = "https://api.mexc.com/api/v3/klines"
+    params = {"symbol": symbol, "interval": interval, "limit": limit}
+    r = requests.get(url, params=params)
+    r.raise_for_status()
+    return r.json()
+
+
+def write_candles(symbol: str = MEXC_SYMBOL, interval: str = "1m", limit: int = 200):
+    candles = get_candles(symbol, interval, limit)
+    for c in candles:
+        open_price = float(c[1])
+        high_price = float(c[2])
+        low_price = float(c[3])
+        close_price = float(c[4])
+        volume = float(c[5])
+        ts = datetime.utcfromtimestamp(c[0] / 1000)
+        point = (
+            Point("mexc_candle")
+            .tag("symbol", symbol)
+            .tag("interval", interval)
+            .field("open", open_price)
+            .field("high", high_price)
+            .field("low", low_price)
+            .field("close", close_price)
+            .field("volume", volume)
+            .time(ts)
+        )
+        write_api.write(bucket=INFLUX_BUCKET, record=point)
+
+# Hämta och skriv senaste candles
+try:
+    logging.info("📊 Hämtar candles...")
+    write_candles(MEXC_SYMBOL, "1m", 200)
+    logging.info("✅ Candles inskrivna")
+except Exception as e:
+    logging.error(f"❌ Kunde inte hämta candles: {e}")
+
 # Kör loop
 while True:
     try:

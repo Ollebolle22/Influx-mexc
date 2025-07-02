@@ -79,6 +79,12 @@ while True:
                 price = float(trade["price"])
                 qty = float(trade["qty"])
                 total = price * qty
+                trade_id = trade.get("tradeId") or trade.get("id")
+                order_id = trade.get("orderId")
+                quote_qty = float(trade.get("quoteQty", 0))
+                commission = float(trade.get("commission", 0))
+                commission_asset = trade.get("commissionAsset")
+                trade_time = int(trade.get("time", 0))
                 point = (
                     Point("mexc_trade")
                     .tag("symbol", MEXC_SYMBOL)
@@ -86,6 +92,12 @@ while True:
                     .field("price", price)
                     .field("qty", qty)
                     .field("total_usd", total)
+                    .field("tradeId", trade_id)
+                    .field("orderId", order_id)
+                    .field("quoteQty", quote_qty)
+                    .field("commission", commission)
+                    .field("commissionAsset", commission_asset)
+                    .field("time", trade_time)
                     .time(datetime.utcnow())
                 )
                 write_api.write(bucket=INFLUX_BUCKET, record=point)
@@ -100,11 +112,15 @@ while True:
         if "balances" in balances:
             for b in balances["balances"]:
                 if b["asset"] in ["SUI", "USDT"]:
-                    bal = float(b["free"]) + float(b["locked"])
+                    free_amt = float(b.get("free", 0))
+                    locked_amt = float(b.get("locked", 0))
+                    bal = free_amt + locked_amt
                     point = (
                         Point("mexc_balance")
                         .tag("asset", b["asset"])
-                        .field("amount", bal)
+                        .field("asset", b["asset"])
+                        .field("free", free_amt)
+                        .field("locked", locked_amt)
                         .time(datetime.utcnow())
                     )
                     write_api.write(bucket=INFLUX_BUCKET, record=point)

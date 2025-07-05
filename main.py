@@ -106,20 +106,37 @@ if __name__ == "__main__":
                 trades = get_my_trades()
                 if isinstance(trades, list):
                     for t in sorted(trades, key=lambda x: int(x["time"])):
-                        side = "buy"  if t.get("isBuyer", False) else "sell"
-                        price= float(t["price"])
-                        qty  = float(t["qty"])
+                        side   = "buy" if t.get("isBuyer", False) else "sell"
+                        price  = float(t["price"])
+                        qty    = float(t["qty"])
+                        q_qty  = float(t.get("quoteQty", 0))
+                        comm   = float(t.get("commission", 0))
+                        c_asset= str(t.get("commissionAsset", ""))
+                        trade_id = int(t.get("id", 0))
+                        order_id = int(t.get("orderId", 0))
+                        trade_ts = int(t.get("time", 0))
+
                         pt = (
                             Point("mexc_trade")
                             .tag("symbol", MEXC_SYMBOL)
                             .tag("side", side)
                             .field("price", price)
                             .field("volume", qty)
-                            .time(datetime.fromtimestamp(int(t["time"])/1000))
+                            .field("tradeId", trade_id)
+                            .field("orderId", order_id)
+                            .field("quoteQty", q_qty)
+                            .field("commission", comm)
+                            .field("commissionAsset", c_asset)
+                            .field("time", trade_ts)
+                            .time(datetime.fromtimestamp(trade_ts/1000))
                         )
                         write_api.write(bucket=INFLUX_BUCKET, record=pt)
                         icon = "📈" if side=="buy" else "📉"
-                        logging.info(f"{icon} {side.upper()} {price} × {qty}")
+                        logging.info(
+                            f"{icon} {side.upper()} {price} × {qty} "
+                            f"id={trade_id} order={order_id} q={q_qty} "
+                            f"comm={comm}{c_asset} time={trade_ts}"
+                        )
                 else:
                     logging.warning(f"❌ Kunde inte tolka trades: {trades}")
             except Exception as e:

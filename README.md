@@ -4,14 +4,14 @@ Real-time streaming of trades and balances from MEXC to InfluxDB.
 
 ### Trades
 
-Mätningen `mexc_trade` innehåller nu även:
+Mätningen `mexc_trade` lagrar endast de fält som faktiskt skrivs in av koden:
 
-- `tradeId`
-- `orderId`
-- `quoteQty`
-- `commission`
-- `commissionAsset`
-- `time`
+- taggarna `symbol` och `side`
+- fälten `price` och `volume`
+- tidsstämpeln från `time`
+
+Ingen PnL räknas automatiskt. Vill du följa vinst och förlust behöver du
+beräkna detta separat eller använda andra API-endpoints.
 
 ### Balans
 
